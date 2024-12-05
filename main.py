@@ -22,6 +22,10 @@ try:
 except Exception as  e:
     print(f"Connection failed: {e}")
     exit()
+db = client["shoetingstarsai"]  # Replace 'mydatabase' with your database name
+
+# Step 3: Choose the collection
+collection = db["results"]  # Replace 'mycollection' with your collection name
 
 
 def convert_to_multiplication(s):
