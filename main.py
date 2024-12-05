@@ -76,15 +76,17 @@ def predict_with_paddleocr(image_path, ocr):
     # Print the extracted text
     return cleaned_text.split(' - ')
 
-for filename in os.listdir(folder_path):
-    file_path = os.path.join(folder_path, filename)
-    if os.path.isfile(file_path):
-        os.remove(file_path)  # Delete file
-    elif os.path.isdir(file_path):
-        shutil.rmtree(file_path)  # Delete sub-folder and its contents
 
 # Delete the folder itself (if desired)
 if os.path.exists(folder_path):
+
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)  # Delete file
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)  # Delete sub-folder and its contents
+
     os.rmdir(folder_path)  # Deletes the folder
 
 # Delete the data.zip file
