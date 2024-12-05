@@ -94,7 +94,7 @@ if os.path.exists(file_path):
     os.remove(file_path)  # Delete the file
 
 os.makedirs(folder_path)
-download_file_from_url(link)
+download_file_from_url(link, file_path)
 extract_and_organize_zip(file_path,folder_path)
 
 ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
