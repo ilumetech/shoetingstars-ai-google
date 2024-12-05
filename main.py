@@ -7,7 +7,7 @@ import re
 from numpy import asarray
 import gc
 from pymongo import MongoClient
-import datetime
+from datetime import datetime
 
 link = 'https://8owpateh4dv3qu1o.public.blob.vercel-storage.com/tes_live2.zip'
 folder_path = './data'
