@@ -5,9 +5,23 @@ from PIL import Image, ImageEnhance
 from paddleocr import PaddleOCR
 import re
 from numpy import asarray
-link = 'https://8owpateh4dv3qu1o.public.blob.vercel-storage.com/tes_live.zip'
+import gc
+from pymongo import MongoClient
+import datetime
+
+link = 'https://8owpateh4dv3qu1o.public.blob.vercel-storage.com/tes_live2.zip'
 folder_path = './data'
 file_path = 'data.zip'
+campaign_name = 'test_google'
+
+MONGO_URI = 'mongodb+srv://shoetingstarsai:ym2CRDS6VfIsAk4m@shoetingstarsai.4bnch.mongodb.net/'
+
+try:
+    client = MongoClient(MONGO_URI)  # Adjust URI if necessary
+    print("Connected to MongoDB!")
+except Exception as  e:
+    print(f"Connection failed: {e}")
+    exit()
 
 
 def convert_to_multiplication(s):
@@ -88,4 +102,18 @@ for i in os.listdir(folder_path):
 
         print(f'predicting : {i}')
         result = predict_with_paddleocr('./data/' + i,ocr)
-        print(result)
+        transaction_value = convert_to_multiplication(result[1])
+
+        response_message = {
+            'username' : result[0],
+            'comment' : result[1],
+            'transaction_value' : transaction_value,
+            "created_at": datetime.now(),  # Store the current UTC time
+            "campaign_name" : campaign_name
+        }
+
+        to_mongo = response_message.copy()
+        result = collection.insert_one(to_mongo)
+        print(f"Document inserted with ID: {result.inserted_id}")
+        gc.collect()
+

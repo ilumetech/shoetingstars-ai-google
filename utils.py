@@ -6,15 +6,13 @@ import shutil
 def download_file_from_url(url, destination_path):
     try:
         # Send a GET request to the URL
-        response = requests.get(url, stream=True)
+        response = requests.get(url)
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
             with open(destination_path, "wb") as file:
-                # Download the file in chunks to handle large files
-                for chunk in response.iter_content(chunk_size=1024):
-                    if chunk:
-                        file.write(chunk)
+                # Write the entire content to the file
+                file.write(response.content)
             print(f"File downloaded successfully and saved to {destination_path}")
         else:
             print(f"Failed to download file. Status code: {response.status_code}")
