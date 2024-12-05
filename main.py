@@ -9,12 +9,18 @@ import gc
 from pymongo import MongoClient
 from datetime import datetime
 
+import dotenv
+
 link = 'https://8owpateh4dv3qu1o.public.blob.vercel-storage.com/tes_live2.zip'
 folder_path = './data'
 file_path = 'data.zip'
 campaign_name = 'test_google'
 
-MONGO_URI = 'mongodb+srv://shoetingstarsai:ym2CRDS6VfIsAk4m@shoetingstarsai.4bnch.mongodb.net/'
+
+dotenv.load_dotenv()  # This will automatically look for .env in the current directory
+
+# Fetch the MONGO_URI from the environment
+MONGO_URI = os.getenv("MONGO_URI")
 
 try:
     client = MongoClient(MONGO_URI)  # Adjust URI if necessary
