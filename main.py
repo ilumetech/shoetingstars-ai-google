@@ -135,8 +135,8 @@ def main():
             print(f"Document inserted with ID: {result.inserted_id}")
             gc.collect()
 
-        print(f"Processing URL: {url}")
-        print(f"Campaign Name: {campaign_name}")
+    print(f"Processing URL: {url}")
+    print(f"Campaign Name: {campaign_name}")
 
 if __name__ == "__main__":
     main()
