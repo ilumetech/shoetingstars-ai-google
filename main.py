@@ -8,31 +8,13 @@ from numpy import asarray
 import gc
 from pymongo import MongoClient
 from datetime import datetime
-
+import argparse
 import dotenv
 
-link = 'https://8owpateh4dv3qu1o.public.blob.vercel-storage.com/tes_live2.zip'
+dotenv.load_dotenv()  # This will automatically look for .env in the current directory
 folder_path = './data'
 file_path = 'data.zip'
-campaign_name = 'test_google'
-
-
-dotenv.load_dotenv()  # This will automatically look for .env in the current directory
-
-# Fetch the MONGO_URI from the environment
 MONGO_URI = os.getenv("MONGO_URI")
-
-try:
-    client = MongoClient(MONGO_URI)  # Adjust URI if necessary
-    print("Connected to MongoDB!")
-except Exception as  e:
-    print(f"Connection failed: {e}")
-    exit()
-db = client["shoetingstarsai"]  # Replace 'mydatabase' with your database name
-
-# Step 3: Choose the collection
-collection = db["results"]  # Replace 'mycollection' with your collection name
-
 
 def convert_to_multiplication(s):
     s = s.replace(' ', '')  
@@ -87,45 +69,74 @@ def predict_with_paddleocr(image_path, ocr):
     return cleaned_text.split(' - ')
 
 
-# Delete the folder itself (if desired)
-if os.path.exists(folder_path):
+def main():
+    # Create the parser
+    parser = argparse.ArgumentParser(description="Process URL and campaign name.")
 
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)  # Delete file
-        elif os.path.isdir(file_path):
-            shutil.rmtree(file_path)  # Delete sub-folder and its contents
+    # Add arguments
+    parser.add_argument("--url", required=True, help="The URL to process")
+    parser.add_argument("--campaign_name", required=True, help="The name of the campaign")
 
-    os.rmdir(folder_path)  # Deletes the folder
+    # Parse arguments
+    args = parser.parse_args()
 
-# Delete the data.zip file
-if os.path.exists(file_path):
-    os.remove(file_path)  # Delete the file
+    # Access arguments
+    url = args.url
+    campaign_name = args.campaign_name
 
-os.makedirs(folder_path)
-download_file_from_url(link, file_path)
-extract_and_organize_zip(file_path,folder_path)
+    try:
+        client = MongoClient(MONGO_URI)  # Adjust URI if necessary
+        print("Connected to MongoDB!")
+    except Exception as  e:
+        print(f"Connection failed: {e}")
+        exit()
+    db = client["shoetingstarsai"]  # Replace 'mydatabase' with your database name
 
-ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
+    collection = db["results"]  # Replace 'mycollection' with your collection name
 
-for i in os.listdir(folder_path):
-    if i.lower().endswith(".jpeg"):
+    if os.path.exists(folder_path):
 
-        print(f'predicting : {i}')
-        result = predict_with_paddleocr('./data/' + i,ocr)
-        transaction_value = convert_to_multiplication(result[1])
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)  # Delete file
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # Delete sub-folder and its contents
 
-        response_message = {
-            'username' : result[0],
-            'comment' : result[1],
-            'transaction_value' : transaction_value,
-            "created_at": datetime.now(),  # Store the current UTC time
-            "campaign_name" : campaign_name
-        }
+        os.rmdir(folder_path)  # Deletes the folder
 
-        to_mongo = response_message.copy()
-        result = collection.insert_one(to_mongo)
-        print(f"Document inserted with ID: {result.inserted_id}")
-        gc.collect()
+    # Delete the data.zip file
+    if os.path.exists(file_path):
+        os.remove(file_path)  # Delete the file
 
+    os.makedirs(folder_path)
+    download_file_from_url(url, file_path)
+    extract_and_organize_zip(file_path,folder_path)
+
+    ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
+
+    for i in os.listdir(folder_path):
+        if i.lower().endswith(".jpeg"):
+
+            print(f'predicting : {i}')
+            result = predict_with_paddleocr('./data/' + i,ocr)
+            transaction_value = convert_to_multiplication(result[1])
+
+            response_message = {
+                'username' : result[0],
+                'comment' : result[1],
+                'transaction_value' : transaction_value,
+                "created_at": datetime.now(),  # Store the current UTC time
+                "campaign_name" : campaign_name
+            }
+
+            to_mongo = response_message.copy()
+            result = collection.insert_one(to_mongo)
+            print(f"Document inserted with ID: {result.inserted_id}")
+            gc.collect()
+
+        print(f"Processing URL: {url}")
+        print(f"Campaign Name: {campaign_name}")
+
+if __name__ == "__main__":
+    main()
