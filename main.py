@@ -119,7 +119,7 @@ def main():
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
 
     for i in os.listdir(folder_path):
-        if i.lower().endswith(".jpeg"):
+        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg"):
 
             print(f'predicting : {i}')
             result = predict_with_paddleocr('./data/' + i,ocr)
