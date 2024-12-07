@@ -12,9 +12,8 @@ import argparse
 import dotenv
 
 dotenv.load_dotenv()  # This will automatically look for .env in the current directory
-folder_path = './data'
-file_path = 'data.zip'
-MONGO_URI = os.getenv("MONGO_URI")
+
+
 
 def convert_to_multiplication(s):
     s = s.replace(' ', '')  
@@ -84,6 +83,10 @@ def main():
     url = args.url
     campaign_name = args.campaign_name
 
+    folder_path = './data'
+    file_name_final = 'data.zip'
+    MONGO_URI = os.getenv("MONGO_URI")
+
     try:
         client = MongoClient(MONGO_URI)  # Adjust URI if necessary
         print("Connected to MongoDB!")
@@ -106,12 +109,12 @@ def main():
         os.rmdir(folder_path)  # Deletes the folder
 
     # Delete the data.zip file
-    if os.path.exists(file_path):
-        os.remove(file_path)  # Delete the file
+    if os.path.exists(file_name_final):
+        os.remove(file_name_final)  # Delete the file
 
     os.makedirs(folder_path)
-    download_file_from_url(url, file_path)
-    extract_and_organize_zip(file_path,folder_path)
+    download_file_from_url(url, file_name_final)
+    extract_and_organize_zip(file_name_final,folder_path)
 
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
 
