@@ -9,6 +9,8 @@ from pymongo import MongoClient
 from datetime import datetime
 import argparse
 import dotenv
+import paddle 
+paddle.utils.run_check()
 
 dotenv.load_dotenv()  # This will automatically look for .env in the current directory
 folder_path = './data'
