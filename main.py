@@ -70,9 +70,22 @@ def main():
 
     collection = db["results"]  # Replace 'mycollection' with your collection name
 
+
+    print('delete old files')
+    if os.path.exists(folder_path):
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)  # Delete file
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # Delete sub-folder and its contents
+
+        os.rmdir(folder_path)  # Deletes the folder
+
+    # Delete the data.zip file
+    if os.path.exists(file_name_final):
+        os.remove(file_name_final)  # Delete the file
     print('Download data')
-
-
     os.makedirs(folder_path)
     download_file_from_url(url, file_name_final)
     extract_and_organize_zip(file_name_final,folder_path)
@@ -165,19 +178,7 @@ def main():
             except Exception as e:
                 print(f"Upload failed: {e}")
 
-    if os.path.exists(folder_path):
-        for filename in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)  # Delete file
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)  # Delete sub-folder and its contents
 
-        os.rmdir(folder_path)  # Deletes the folder
-
-    # Delete the data.zip file
-    if os.path.exists(file_name_final):
-        os.remove(file_name_final)  # Delete the file
 
 
 
