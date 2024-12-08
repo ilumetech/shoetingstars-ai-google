@@ -22,7 +22,7 @@ def predict_with_paddleocr(image_path, ocr, add_top = 0, add_bottom = 0, whole =
     image = image.resize((width, height))
 
     crop_box = (0, height - (260 + add_top), width, height - (150 + add_bottom))  
-    bottom_part = image.crop(crop_box)
+    bottom_part = image.crop(crop_box).convert("RGB")
 
     if(whole):
       result = ocr.ocr(asarray(image))
