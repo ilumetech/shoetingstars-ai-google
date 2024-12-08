@@ -5,7 +5,6 @@ from PIL import Image, ImageEnhance
 from paddleocr import PaddleOCR
 import re
 from numpy import asarray
-import gc
 from pymongo import MongoClient
 from datetime import datetime
 import argparse
@@ -79,7 +78,7 @@ def main():
     extract_and_organize_zip(file_name_final,folder_path)
 
 
-    ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
+    ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=True,use_onnx = False)
 
     print('Prediction')
 
@@ -91,15 +90,16 @@ def main():
             print(f'predicting : {i}')
             result = predict_with_paddleocr('./data/' + i,ocr)
             # print(result)
+            print('checking comment')
             while(('comment' in result[0])):
                 add_top += 20
                 add_bottom += 15
                 result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
-            # print(result)
+            print('making the crop more accurate')
             if((' ' in result[0]) and ('comment' not in result[0])):
                 add_top -= 10
                 result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
-            # print(result)
+            print('Check if only one result')
             if(len(result) == 1):
                 result[0] = result[0].replace(' -','')
                 result.append('1000')
@@ -107,6 +107,7 @@ def main():
             
             add_top += 60
             add_bottom += 90
+            print('check_shoeting')
             check_shoeting = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
             match2 = find_number_after_pattern(check_shoeting[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
             if(match2):
@@ -142,9 +143,9 @@ def main():
 
             }
             to_mongo = response_message.copy()
+            print('inserting to mongo')
             result = collection.insert_one(to_mongo)
             print(f"Document inserted with ID: {result.inserted_id}")
-            gc.collect()
             
 
     print('upload to vercel')
