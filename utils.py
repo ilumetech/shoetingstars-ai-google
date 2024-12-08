@@ -52,7 +52,8 @@ def extract_and_organize_zip(zip_path, output_folder):
                     dest_path = os.path.join(output_folder, file)
                     
                     # Move the file
-                    shutil.move(current_file_path, dest_path)
+                    shutil.copy2(current_file_path, dest_path)
+                    os.remove(current_file_path)
             
             # Remove the temporary extraction directory
             shutil.rmtree(temp_extract_path)
