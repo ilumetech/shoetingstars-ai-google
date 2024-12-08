@@ -66,9 +66,9 @@ def main():
     except Exception as  e:
         print(f"Connection failed: {e}")
         exit()
-    db = client["shoetingstarsai"]  # Replace 'mydatabase' with your database name
+    db = client["test"]  # Replace 'mydatabase' with your database name
 
-    collection = db["results"]  # Replace 'mycollection' with your collection name
+    collection = db["Transaction"]  # Replace 'mycollection' with your collection name
 
 
     print('delete old files')
