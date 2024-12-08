@@ -43,6 +43,7 @@ def predict_with_paddleocr(image_path, ocr, add_top = 0, add_bottom = 0, whole =
 def main():
     # Create the parser
 
+    print('parsing')
     parser = argparse.ArgumentParser(description="Process URL and campaign name.")
 
     # Add arguments
@@ -58,19 +59,7 @@ def main():
 
     campaign_name_new = convert_to_underscores(campaign_name)
 
-    for i in os.listdir(folder_path):
-        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
-            new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
-            rename_file(folder_path + '/' + i, new_file_name)
-            try:
-                result = upload_to_vercel_blob(
-                    file_path=new_file_name,
-                    blob_token=VERCEL_BLOB_TOKEN,
-                )
-                print(f"Image uploaded successfully: {result['url']}")
-            except Exception as e:
-                print(f"Upload failed: {e}")
-
+    print('Connect to mongo')
 
     try:
         client = MongoClient(MONGO_URI)  # Adjust URI if necessary
@@ -81,6 +70,8 @@ def main():
     db = client["shoetingstarsai"]  # Replace 'mydatabase' with your database name
 
     collection = db["results"]  # Replace 'mycollection' with your collection name
+
+    print('Download and delete old files')
 
     if os.path.exists(folder_path):
 
@@ -101,7 +92,24 @@ def main():
     download_file_from_url(url, file_name_final)
     extract_and_organize_zip(file_name_final,folder_path)
 
+
+    print('upload to vercel')
+    for i in os.listdir(folder_path):
+        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
+            new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
+            rename_file(folder_path + '/' + i, new_file_name)
+            try:
+                result = upload_to_vercel_blob(
+                    file_path=new_file_name,
+                    blob_token=VERCEL_BLOB_TOKEN,
+                )
+                print(f"Image uploaded successfully: {result['url']}")
+            except Exception as e:
+                print(f"Upload failed: {e}")
+
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
+
+    print('Prediction')
 
     for i in os.listdir(folder_path):
         add_top = 0
