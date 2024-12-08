@@ -71,22 +71,8 @@ def main():
 
     collection = db["results"]  # Replace 'mycollection' with your collection name
 
-    print('Download and delete old files')
+    print('Download data')
 
-    if os.path.exists(folder_path):
-
-        for filename in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)  # Delete file
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)  # Delete sub-folder and its contents
-
-        os.rmdir(folder_path)  # Deletes the folder
-
-    # Delete the data.zip file
-    if os.path.exists(file_name_final):
-        os.remove(file_name_final)  # Delete the file
 
     os.makedirs(folder_path)
     download_file_from_url(url, file_name_final)
@@ -173,6 +159,21 @@ def main():
             result = collection.insert_one(to_mongo)
             print(f"Document inserted with ID: {result.inserted_id}")
             gc.collect()
+
+    if os.path.exists(folder_path):
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)  # Delete file
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # Delete sub-folder and its contents
+
+        os.rmdir(folder_path)  # Deletes the folder
+
+    # Delete the data.zip file
+    if os.path.exists(file_name_final):
+        os.remove(file_name_final)  # Delete the file
+
 
 
 if __name__ == "__main__":
