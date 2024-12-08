@@ -1,4 +1,4 @@
-from utils import download_file_from_url,extract_and_organize_zip
+from utils import download_file_from_url,extract_and_organize_zip, rename_file, convert_to_underscores, find_number_after_pattern,convert_to_multiplication,upload_to_vercel_blob
 import os
 import shutil
 from PIL import Image, ImageEnhance
@@ -12,64 +12,37 @@ import argparse
 import dotenv
 
 dotenv.load_dotenv()  # This will automatically look for .env in the current directory
+folder_path = './data'
+file_name_final = 'data.zip'
+MONGO_URI = os.getenv("MONGO_URI")
+VERCEL_BLOB_TOKEN = os.getenv("VERCEL_BLOB_TOKEN")
 
-
-
-def convert_to_multiplication(s):
-    s = s.replace(' ', '')  
-    
-    match = re.search(r"(\d+(\.\d+)?)", s)
-    
-    if match:
-        num_str = match.group(1)  
-        number = float(num_str)  
-        
-        
-        if number <= 10:
-            multiplier = 1000
-            result = number * multiplier  # Multiply integer by 1000
-        else:
-            multiplier = 1000
-            result = number * multiplier  # Multiply decimal by 1000
-        
-        # Return the formatted result as an integer
-        return int(result)
-    else:
-        return "No valid number found in the string"
-
-def predict_with_paddleocr(image_path, ocr):
-    # Open the image
+def predict_with_paddleocr(image_path, ocr, add_top = 0, add_bottom = 0, whole = False):
     image = Image.open(image_path)
-    width, height = image.size
+    width, height = (591, 1280)
+    image = image.resize((width, height))
 
-    # Crop the bottom part of the image
-    crop_box = (0, height - 250, width, height - 150)  # Adjust these values as needed
+    crop_box = (0, height - (260 + add_top), width, height - (150 + add_bottom))  
     bottom_part = image.crop(crop_box)
 
-    # Convert to grayscale
-    gray_image = bottom_part.convert("L")
+    if(whole):
+      result = ocr.ocr(asarray(image))
+    else:
+      result = ocr.ocr(asarray(bottom_part))
 
-    # Enhance contrast
-    enhancer = ImageEnhance.Contrast(gray_image)
-    enhanced_image = enhancer.enhance(1.2)  # Use a smaller enhancement factor
-
-    # Resize image (downscaling to reduce the OCR load)
-    small_image = enhanced_image.resize((enhanced_image.width // 2, enhanced_image.height // 2))
-
-    result = ocr.ocr(asarray(small_image))
-    # Extract and format text results
     extracted_text = " ".join([line[1][0] for line in result[0]])
     cleaned_text = re.sub(r'\b[a-zA-Z]\b', '', extracted_text)
 
     cleaned_text = cleaned_text.lower().replace('pinned', ' - ')
-    cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()  # Strip leading/trailing spaces
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()  
+    cleaned_text = cleaned_text.replace(' +','')
 
-    # Print the extracted text
     return cleaned_text.split(' - ')
 
 
 def main():
     # Create the parser
+
     parser = argparse.ArgumentParser(description="Process URL and campaign name.")
 
     # Add arguments
@@ -83,9 +56,21 @@ def main():
     url = args.url
     campaign_name = args.campaign_name
 
-    folder_path = './data'
-    file_name_final = 'data.zip'
-    MONGO_URI = os.getenv("MONGO_URI")
+    campaign_name_new = convert_to_underscores(campaign_name)
+
+    for i in os.listdir(folder_path):
+        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
+            new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
+            rename_file(folder_path + '/' + i, new_file_name)
+            try:
+                result = upload_to_vercel_blob(
+                    file_path=new_file_name,
+                    blob_token=VERCEL_BLOB_TOKEN,
+                )
+                print(f"Image uploaded successfully: {result['url']}")
+            except Exception as e:
+                print(f"Upload failed: {e}")
+
 
     try:
         client = MongoClient(MONGO_URI)  # Adjust URI if necessary
@@ -119,27 +104,68 @@ def main():
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
 
     for i in os.listdir(folder_path):
-        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg"):
-
+        add_top = 0
+        add_bottom = 0
+        need_checking = 0
+        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
             print(f'predicting : {i}')
             result = predict_with_paddleocr('./data/' + i,ocr)
-            transaction_value = convert_to_multiplication(result[1])
+            # print(result)
+            while(('comment' in result[0])):
+                add_top += 20
+                add_bottom += 15
+                result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+            # print(result)
+            if((' ' in result[0]) and ('comment' not in result[0])):
+                add_top -= 10
+                result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+            # print(result)
+            if(len(result) == 1):
+                result[0] = result[0].replace(' -','')
+                result.append('1000')
+                need_checking = 1
+            
+            add_top += 60
+            add_bottom += 90
+            check_shoeting,_ = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+            match2 = find_number_after_pattern(check_shoeting[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
+            if(match2):
+                word_after2 = match2.group(1)
+                final = [result[0], word_after2]
+                shoeting_comment = word_after2
+            else:
+                final = result 
+                if not re.search(r'\d', final[1]):
+                    need_checking = 1
+                    result2 = predict_with_paddleocr('./data/' + i,ocr, whole = True)
+                    match = find_number_after_pattern(result2[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
+                    if match:
+                        word_after = match.group(1)
+                        shoeting_comment = word_after
+                    else:
+                        word_after = 'giveaway'
+                        shoeting_comment = 'None'
+                    final = [result[0], word_after]
+                else:
+                    shoeting_comment = 'None'
 
+            
             response_message = {
-                'username' : result[0],
+                'user_name' : final[0],
                 'comment' : result[1],
-                'transaction_value' : transaction_value,
+                'shoeting_comment' : shoeting_comment,
+                'transaction_value' : convert_to_multiplication(final[1]),
+                'check_flag' : need_checking,
+                'image_path' : i,
                 "created_at": datetime.now(),  # Store the current UTC time
                 "campaign_name" : campaign_name
-            }
 
+            }
             to_mongo = response_message.copy()
             result = collection.insert_one(to_mongo)
             print(f"Document inserted with ID: {result.inserted_id}")
             gc.collect()
 
-    print(f"Processing URL: {url}")
-    print(f"Campaign Name: {campaign_name}")
 
 if __name__ == "__main__":
     main()
