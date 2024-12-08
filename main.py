@@ -78,7 +78,7 @@ def main():
     extract_and_organize_zip(file_name_final,folder_path)
 
 
-    ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=True,use_onnx = False)
+    ocr = PaddleOCR(use_angle_cls=False, lang='en', show_log=True,use_onnx = False)
 
     print('Prediction')
 
