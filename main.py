@@ -79,20 +79,6 @@ def main():
     extract_and_organize_zip(file_name_final,folder_path)
 
 
-    print('upload to vercel')
-    for i in os.listdir(folder_path):
-        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
-            new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
-            rename_file(folder_path + '/' + i, new_file_name)
-            try:
-                result = upload_to_vercel_blob(
-                    file_path=new_file_name,
-                    blob_token=VERCEL_BLOB_TOKEN,
-                )
-                print(f"Image uploaded successfully: {result['url']}")
-            except Exception as e:
-                print(f"Upload failed: {e}")
-
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False,use_onnx = False)
 
     print('Prediction')
@@ -159,6 +145,21 @@ def main():
             result = collection.insert_one(to_mongo)
             print(f"Document inserted with ID: {result.inserted_id}")
             gc.collect()
+            
+
+    print('upload to vercel')
+    for i in os.listdir(folder_path):
+        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
+            # new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
+            # rename_file(folder_path + '/' + i, new_file_name)
+            try:
+                result = upload_to_vercel_blob(
+                    file_path=folder_path + '/'  +i,
+                    blob_token=VERCEL_BLOB_TOKEN,
+                )
+                print(f"Image uploaded successfully: {result['url']}")
+            except Exception as e:
+                print(f"Upload failed: {e}")
 
     if os.path.exists(folder_path):
         for filename in os.listdir(folder_path):
