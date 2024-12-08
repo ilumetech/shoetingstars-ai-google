@@ -16,10 +16,8 @@ file_name_final = 'data.zip'
 MONGO_URI = os.getenv("MONGO_URI")
 VERCEL_BLOB_TOKEN = os.getenv("VERCEL_BLOB_TOKEN")
 
-def predict_with_paddleocr(image_path, ocr, add_top = 0, add_bottom = 0, whole = False):
-    image = Image.open(image_path)
+def predict_with_paddleocr(image, ocr, add_top = 0, add_bottom = 0, whole = False):
     width, height = (591, 1280)
-    image = image.resize((width, height))
 
     crop_box = (0, height - (260 + add_top), width, height - (150 + add_bottom))  
     bottom_part = image.crop(crop_box).convert("RGB")
@@ -88,17 +86,20 @@ def main():
         need_checking = 0
         if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
             print(f'predicting : {i}')
-            result = predict_with_paddleocr('./data/' + i,ocr)
+            image = Image.open('./data/' + i)
+            width, height = (591, 1280)
+            image = image.resize((width, height))
+            result = predict_with_paddleocr(image,ocr)
             # print(result)
             print('checking comment')
             while(('comment' in result[0])):
                 add_top += 20
                 add_bottom += 15
-                result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+                result = predict_with_paddleocr(image,ocr, add_top=add_top, add_bottom=add_bottom)
             print('making the crop more accurate')
             if((' ' in result[0]) and ('comment' not in result[0])):
                 add_top -= 10
-                result = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+                result = predict_with_paddleocr(image,ocr, add_top=add_top, add_bottom=add_bottom)
             print('Check if only one result')
             if(len(result) == 1):
                 result[0] = result[0].replace(' -','')
@@ -108,7 +109,7 @@ def main():
             add_top += 60
             add_bottom += 90
             print('check_shoeting')
-            check_shoeting = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+            check_shoeting = predict_with_paddleocr(image,ocr, add_top=add_top, add_bottom=add_bottom)
             match2 = find_number_after_pattern(check_shoeting[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
             if(match2):
                 word_after2 = match2.group(1)
@@ -118,7 +119,7 @@ def main():
                 final = result 
                 if not re.search(r'\d', final[1]):
                     need_checking = 1
-                    result2 = predict_with_paddleocr('./data/' + i,ocr, whole = True)
+                    result2 = predict_with_paddleocr(image,ocr, whole = True)
                     match = find_number_after_pattern(result2[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
                     if match:
                         word_after = match.group(1)
