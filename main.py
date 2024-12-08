@@ -127,7 +127,7 @@ def main():
             
             add_top += 60
             add_bottom += 90
-            check_shoeting,_ = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
+            check_shoeting = predict_with_paddleocr('./data/' + i,ocr, add_top=add_top, add_bottom=add_bottom)
             match2 = find_number_after_pattern(check_shoeting[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
             if(match2):
                 word_after2 = match2.group(1)
