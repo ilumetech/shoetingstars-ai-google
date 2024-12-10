@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 import zipfile
 import shutil
 import re
@@ -183,3 +184,23 @@ def upload_to_vercel_blob(
         'pathname': upload_result.get('pathname'),
         'downloadUrl': upload_result.get('downloadUrl')
     }
+
+def hit_callback(campaign_name, status):
+    url = "https://your-api-endpoint.com/api/live-photo/callback"  # Replace with your actual URL
+
+    payload = {
+        "status":status,
+        "campaign_name": campaign_name
+    }
+
+    headers = {
+        "Content-Type": "application/json"  
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    if response.status_code == 200:
+        print("Request successful:", response.json())  # Parse the JSON response
+    else:
+        print(f"Request failed with status code {response.status_code}")
+        print(response.text)

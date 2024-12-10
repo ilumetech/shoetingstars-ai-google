@@ -1,4 +1,4 @@
-from utils import download_file_from_url,extract_and_organize_zip, rename_file, convert_to_underscores, find_number_after_pattern,convert_to_multiplication,upload_to_vercel_blob
+from utils import hit_callback,download_file_from_url,extract_and_organize_zip, rename_file, convert_to_underscores, find_number_after_pattern,convert_to_multiplication,upload_to_vercel_blob
 import os
 import shutil
 from PIL import Image, ImageEnhance
@@ -10,6 +10,8 @@ from datetime import datetime
 import argparse
 import dotenv
 import paddle 
+import requests
+
 paddle.utils.run_check()
 
 dotenv.load_dotenv()  # This will automatically look for .env in the current directory
@@ -177,6 +179,8 @@ def main():
                 print(f"Image uploaded successfully: {result['url']}")
             except Exception as e:
                 print(f"Upload failed: {e}")
+
+    hit_callback(campaign_name, "success")
 
 
 
