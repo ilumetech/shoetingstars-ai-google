@@ -186,7 +186,7 @@ def upload_to_vercel_blob(
     }
 
 def hit_callback(campaign_name, status):
-    url = "https://your-api-endpoint.com/api/live-photo/callback"  # Replace with your actual URL
+    url = "https://shoetingstars-ai-service.vercel.app/api/live-photo/callback"  # Replace with your actual URL
 
     payload = {
         "status":status,
