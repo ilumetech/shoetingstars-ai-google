@@ -100,7 +100,7 @@ def main():
     for i in os.listdir(folder_path):
         add_top = 0
         add_bottom = 0
-        need_checking = 0
+        need_checking = False
         if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
             print(f'predicting : {i}')
             image = Image.open('./data/' + i)
@@ -121,7 +121,7 @@ def main():
             if(len(result) == 1):
                 result[0] = result[0].replace(' -','')
                 result.append('1000')
-                need_checking = 1
+                need_checking = True
             
             add_top += 60
             add_bottom += 90
@@ -132,10 +132,12 @@ def main():
                 word_after2 = match2.group(1)
                 final = [result[0], word_after2]
                 shoeting_comment = word_after2
+                need_checking = True
+
             else:
                 final = result 
+                need_checking = True
                 if not re.search(r'\d', final[1]):
-                    need_checking = 1
                     result2 = predict_with_paddleocr(image,ocr, whole = True)
                     match = find_number_after_pattern(result2[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
                     if match:
@@ -150,15 +152,15 @@ def main():
 
             
             response_message = {
-                'user_name' : final[0],
+                'userName' : final[0],
                 'comment' : result[1],
-                'shoeting_comment' : shoeting_comment,
-                'transaction_value' : convert_to_multiplication(final[1]),
-                'check_flag' : need_checking,
-                'image_path' : i,
-                "created_at": datetime.now(),  # Store the current UTC time
-                "campaign_name" : campaign_name
-
+                'shoetingComment' : shoeting_comment,
+                'transactionValue' : convert_to_multiplication(final[1]),
+                'checkFlag' : need_checking,
+                'imagePath' : i,
+                "createdAt": datetime.now(),  # Store the current UTC time
+                "campaignName" : campaign_name,
+                "isManuallyAdjusted" : False
             }
             to_mongo = response_message.copy()
             print('inserting to mongo')
