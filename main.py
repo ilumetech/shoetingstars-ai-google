@@ -70,7 +70,7 @@ def main():
         exit()
     db = client["test"]  # Replace 'mydatabase' with your database name
 
-    collection = db["Transaction"]  # Replace 'mycollection' with your collection name
+    collection = db["transaction"]  # Replace 'mycollection' with your collection name
 
 
     print('delete old files')
