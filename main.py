@@ -132,11 +132,9 @@ def main():
                 word_after2 = match2.group(1)
                 final = [result[0], word_after2]
                 shoeting_comment = word_after2
-                need_checking = True
 
             else:
                 final = result 
-                need_checking = True
                 if not re.search(r'\d', final[1]):
                     result2 = predict_with_paddleocr(image,ocr, whole = True)
                     match = find_number_after_pattern(result2[0], ['shoeting.stars', 'shoetingstars.lux', 'shoetingstars.catalog'])
@@ -146,6 +144,7 @@ def main():
                     else:
                         word_after = 'giveaway'
                         shoeting_comment = 'None'
+                        need_checking = True
                     final = [result[0], word_after]
                 else:
                     shoeting_comment = 'None'
@@ -178,7 +177,7 @@ def main():
                     file_path=folder_path + '/'  +i,
                     blob_token=VERCEL_BLOB_TOKEN,
                 )
-                print(f"Image uploaded successfully: {result['url']}")
+                # print(f"Image uploaded successfully: {result['url']}")
             except Exception as e:
                 print(f"Upload failed: {e}")
 
