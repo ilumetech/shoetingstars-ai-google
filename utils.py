@@ -190,7 +190,7 @@ def hit_callback(campaign_name, status):
 
     payload = {
         "status":status,
-        "campaigName": campaign_name
+        "campaignName": campaign_name
     }
 
     headers = {
