@@ -93,7 +93,7 @@ def convert_to_multiplication(s):
     number = float(num_str)
 
     if number <= 10:
-        multiplier = 1000
+        multiplier = 1000000
         result = number * multiplier  # Multiply integer by 1000
     else:
         multiplier = 1000

@@ -31,7 +31,13 @@ def predict_with_paddleocr(image, ocr, add_top = 0, add_bottom = 0, whole = Fals
     else:
       result = ocr.ocr(asarray(bottom_part))
 
-    extracted_text = " ".join([line[1][0] for line in result[0]])
+    try:
+        extracted_text = " ".join([line[1][0] for line in result[0]])
+    except Exception as e:
+        print(e)
+        print(result)
+        extracted_text = " - "
+
     cleaned_text = re.sub(r'\b[a-zA-Z]\b', '', extracted_text)
 
     cleaned_text = cleaned_text.lower().replace('pinned', ' - ')
@@ -149,12 +155,21 @@ def main():
                 else:
                     shoeting_comment = 'None'
 
-            
+            transaction_value = convert_to_multiplication(final[1])
+            if(transaction_value >= 100000000):
+                need_checking = True
+
+            if('/' in result[1]):
+                need_checking = True
+
+            if(result[0] == ' '):
+                need_checking = True
+
             response_message = {
                 'userName' : final[0],
                 'comment' : result[1],
                 'shoetingComment' : shoeting_comment,
-                'transactionValue' : convert_to_multiplication(final[1]),
+                'transactionValue' : transaction_value,
                 'checkFlag' : need_checking,
                 'imagePath' : i,
                 "createdAt": datetime.now(),  # Store the current UTC time
