@@ -156,7 +156,7 @@ def main():
                     shoeting_comment = 'None'
 
             transaction_value = convert_to_multiplication(final[1])
-            if(transaction_value >= 100000000):
+            if(transaction_value >= 10000000):
                 need_checking = True
 
             if('/' in result[1]):
