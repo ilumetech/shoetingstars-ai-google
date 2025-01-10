@@ -173,6 +173,8 @@ def main():
                 need_checking = True
             if(final[0] == 'tootimetootime'):
                 user_name_final = "tootimetootime____"
+            elif(final[0] == 'faiah_muh79'):
+                user_name_final = "falah_muh79"
             else:
                 user_name_final = final[0]
             response_message = {
