@@ -1,4 +1,4 @@
-from utils import hit_callback,download_file_from_url,extract_and_organize_zip, rename_file, convert_to_underscores, find_number_after_pattern,convert_to_multiplication,upload_to_vercel_blob
+from utils import hit_callback,download_file_from_url,extract_and_organize_zip, rename_file, convert_to_underscores, find_number_after_pattern,convert_to_multiplication,upload_to_vercel_blob,remove_single_char_before_pinned
 import os
 import shutil
 from PIL import Image, ImageEnhance
@@ -11,6 +11,8 @@ import argparse
 import dotenv
 import paddle 
 import requests
+import numpy as np
+import cv2
 
 paddle.utils.run_check()
 
@@ -20,16 +22,22 @@ file_name_final = 'data.zip'
 MONGO_URI = os.getenv("MONGO_URI")
 VERCEL_BLOB_TOKEN = os.getenv("VERCEL_BLOB_TOKEN")
 
+
+
 def predict_with_paddleocr(image, ocr, add_top = 0, add_bottom = 0, whole = False):
     width, height = (591, 1280)
 
-    crop_box = (0, height - (260 + add_top), width, height - (150 + add_bottom))  
-    bottom_part = image.crop(crop_box).convert("RGB")
+    crop_box = (0, height - (250 + add_top), width, height - (160 + add_bottom))  
+    bottom_part = image.crop(crop_box)
+    bottom_part_array = np.array(bottom_part)
+
+    # Invert colors using OpenCV
+    inverted_image = cv2.bitwise_not(bottom_part_array)
 
     if(whole):
       result = ocr.ocr(asarray(image))
     else:
-      result = ocr.ocr(asarray(bottom_part))
+      result = ocr.ocr(inverted_image)
 
     try:
         extracted_text = " ".join([line[1][0] for line in result[0]])
@@ -38,8 +46,7 @@ def predict_with_paddleocr(image, ocr, add_top = 0, add_bottom = 0, whole = Fals
         print(result)
         extracted_text = " - "
 
-    cleaned_text = re.sub(r'\b[a-zA-Z]\b', '', extracted_text)
-
+    cleaned_text = remove_single_char_before_pinned(extracted_text.lower())
     cleaned_text = cleaned_text.lower().replace('pinned', ' - ')
     cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()  
     cleaned_text = cleaned_text.replace(' +','')
@@ -109,7 +116,7 @@ def main():
         need_checking = False
         if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
             print(f'predicting : {i}')
-            image = Image.open('./data/' + i)
+            image = Image.open('./data/' + i).convert('L')
             width, height = (591, 1280)
             image = image.resize((width, height))
             result = predict_with_paddleocr(image,ocr)
@@ -164,9 +171,12 @@ def main():
 
             if(result[0] == ' '):
                 need_checking = True
-
+            if(final[0] == 'tootimetootime'):
+                user_name_final = "tootimetootime____"
+            else:
+                user_name_final = final[0]
             response_message = {
-                'userName' : final[0],
+                'userName' : user_name_final,
                 'comment' : result[1],
                 'shoetingComment' : shoeting_comment,
                 'transactionValue' : transaction_value,

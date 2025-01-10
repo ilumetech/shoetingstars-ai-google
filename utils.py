@@ -6,6 +6,21 @@ import shutil
 import re
 import mimetypes
 
+
+def remove_single_char_before_pinned(input_string):
+    # Split the string into words
+    words = input_string.split()
+    
+    # Loop through the words to find "PINNED"
+    for i in range(1, len(words)):
+        if words[i] == "pinned" and len(words[i - 1]) == 1:
+            # Remove the word before "PINNED" if its length is 1
+            words.pop(i - 1)
+            break
+    
+    # Join the remaining words back into a single string
+    return ' '.join(words)
+
 def download_file_from_url(url, destination_path):
     try:
         # Send a GET request to the URL
