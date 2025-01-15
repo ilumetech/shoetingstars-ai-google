@@ -171,12 +171,17 @@ def main():
 
             if(result[0] == ' '):
                 need_checking = True
-            if(final[0] == 'tootimetootime'):
+            
+            if final[0] in {'tootimetootime', 'tootimetootime_', 'tootimetootime__', 'tootimetootime___'}:
                 user_name_final = "tootimetootime____"
             elif(final[0] == 'faiah_muh79'):
                 user_name_final = "falah_muh79"
             else:
                 user_name_final = final[0]
+
+            if(shoeting_comment != 'None'):
+                need_checking = True
+
             response_message = {
                 'userName' : user_name_final,
                 'comment' : result[1],
