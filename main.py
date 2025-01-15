@@ -169,6 +169,12 @@ def main():
             if('/' in result[1]):
                 need_checking = True
 
+            if('.' in result[1]):
+                need_checking = True
+
+            if(' ' in result[0]):
+                need_checking = True
+
             if(result[0] == ' '):
                 need_checking = True
             
