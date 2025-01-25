@@ -205,24 +205,8 @@ def main():
             print(f"Document inserted with ID: {result.inserted_id}")
             
 
-    print('upload to vercel')
-    for i in os.listdir(folder_path):
-        if i.lower().endswith(".jpeg") or i.lower().endswith(".jpg") or i.lower().endswith(".png"):
-            # new_file_name = folder_path + '/'  + campaign_name_new + '_' + i
-            # rename_file(folder_path + '/' + i, new_file_name)
-            try:
-                result = upload_to_vercel_blob(
-                    file_path=folder_path + '/'  +i,
-                    blob_token=VERCEL_BLOB_TOKEN,
-                )
-                # print(f"Image uploaded successfully: {result['url']}")
-            except Exception as e:
-                print(f"Upload failed: {e}")
 
     hit_callback(campaign_name, "success")
-
-
-
 
 
 if __name__ == "__main__":
