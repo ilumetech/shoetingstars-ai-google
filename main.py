@@ -133,8 +133,13 @@ def main():
             print('Check if only one result')
             if(len(result) == 1):
                 result[0] = result[0].replace(' -','')
-                result.append('1000')
+                if(' ' in result[0]):
+                    rs = result[0].split(' ')
+                    result = []
+                    result.append(rs[0])
+                    result.append(' '.join(rs[1:]))
                 need_checking = True
+
             
             add_top += 60
             add_bottom += 90
@@ -166,6 +171,9 @@ def main():
             if(transaction_value >= 10000000):
                 need_checking = True
 
+            if(transaction_value == 0):
+                need_checking = True
+
             if('/' in result[1]):
                 need_checking = True
 
@@ -177,6 +185,7 @@ def main():
 
             if(result[0] == ' '):
                 need_checking = True
+
             
             if final[0] in {'tootimetootime', 'tootimetootime_', 'tootimetootime__', 'tootimetootime___'}:
                 user_name_final = "tootimetootime____"
